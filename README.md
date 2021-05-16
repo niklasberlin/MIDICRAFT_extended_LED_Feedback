@@ -3,4 +3,5 @@ Lua script for grandMA2 Lighting Consoles to provide LED Feedback on Midi-Contro
 
 # ToDo:
 -add possibility to get colors for macros and effects and not only sequences
+
 -add more user colors to be more flexible
