@@ -1,4 +1,4 @@
-# MIDICRAFT extended LED Feedback
+# MIDICRAFT extended LED Feedback v1.0
 Lua script for grandMA2 Lighting Consoles to provide LED Feedback on Midi-Controllers from Midicraft
 
 # ToDo:
