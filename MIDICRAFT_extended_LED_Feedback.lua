@@ -89,7 +89,7 @@ updateOnPageChange = true
 ---------------------------------------------------------------
 ------------- MidiFeedbackLoop by GLAD - 2016 -----------------
 ---- Modified for Midicraft Controllers by Niklas Aumüller ----
------------------------ Version 1.0 ---------------------------
+----------------------- Version 1.1 ---------------------------
 -------- sends Midi note-velocity combinations based ----------
 ----------- on Lua accessible executor information: -----------
 ---- empty / non-empty / sequence (off) / sequence (on) -------
@@ -112,6 +112,53 @@ local function warning()
   end
 end
 ------- end v3.2.x  bug warning  - delete when fixed  ---------
+
+local function inTable(value, table)
+
+  for i,v in ipairs(table) do
+
+    if v == value then
+      return true
+    end
+
+  end
+  return false
+end
+
+local function CheckConfig()
+  --this function will check the user configuration for errors
+  local modes = {'off', 'static dark', 'static bright', 'flashing bright', 'flashing dark', 'static dark controller', 'static bright controller', 'flashing bright controller', 'flashing dark controller', 'feedback', 'feedback controller', 'user color dark', 'user color bright', 'user color flashing bright', 'user color flashing dark'}
+  local varNames = {['ledModeSeqOn'] = ledModeSeqOn, ['ledModeSeqOff'] = ledModeSeqOff, ['ledModeEmpty'] = ledModeEmpty, ['ledModeNotEmpty'] = ledModeNotEmpty}
+  -- check all mode variables
+  for k, v in ipairs(varNames) do
+    if not inTable(v, modes) then
+      gma.echo('Variable '..k..' has a not accepted value')
+      gma.feedback('Variable '..k..' has a not accepted value')
+      return false
+    end
+  end
+
+  if not inTable(userColor, {'white', 'red', 'orange', 'yellow', 'ferngreen', 'green', 'seagreen', 'cyan', 'lavender','blue', 'violet', 'magenta', 'pink', 'CTO', 'CTB' }) then
+    gma.feedback('Variable userColor has a not accepted color')
+    gma.echo('Variable userColor has a not accepted color')
+    return false
+  end
+
+  if type(updateOnlyOnStart) ~= 'boolean' then
+    gma.feedback('Variable updateOnlyOnStart needs to be an boolean (true or false)')
+    gma.echo('Variable updateOnlyOnStart needs to be an boolean (true or false)')
+    return false
+  end
+
+  if type(updateOnPageChange) ~= 'boolean' then
+    gma.feedback('Variable updateOnPageChange needs to be an boolean (true or false)')
+    gma.echo('Variable updateOnPageChange needs to be an boolean (true or false)')
+    return false
+  end
+
+
+  return true
+end
 
 local helper = {}
 helper.class2txt = function(class)
@@ -345,8 +392,6 @@ local isStart = true
 
 local midifeedback = {}
 do local _ENV = midifeedback
-
-  local velocity = {0,126,126,127} -- velocity(color)codes for empty, non-empty, sequence (off), sequence (on)
     
   getHandle = gma.show.getobj.handle
   getClass = gma.show.getobj.class
@@ -390,7 +435,7 @@ do local _ENV = midifeedback
   end
 
 
-  class2velocity = { CMD_ROOT = velocity[1], CMD_EXEC = velocity[2], CMD_SEQUENCE = velocity[3], CMD_CUE = velocity[4] }  --CMD_ROOT - empty, CMD_EXEC - not a sequence probably a macro, CMD_SEQUENCE - sequence is off, CMD_CUE, Sequence is ON
+  
   class2txt = { CMD_ROOT = 'CMD_ROOT', CMD_EXEC = 'CMD_EXEC', CMD_SEQUENCE = 'CMD_SEQUENCE', CMD_CUE = 'CMD_CUE' }
   midiSyntax, execToken, cueToken = 'MidiNote %s %i', 'Executor %s', 'Executor %s Cue'  
   ledModeSeqOn = helper.get.ledModeSeqOn()
@@ -467,10 +512,6 @@ do local _ENV = midifeedback
         return helper.get.modeOffset(mode)
       end
     end
-    --parse Appearance Color
-
-    --calculate velocity based on Exec Type, Status and Appearance Color
-    return class2velocity[c]
   end
 
   start = function()    
@@ -479,13 +520,18 @@ do local _ENV = midifeedback
     cache = {}
     gma.echo('MidiFeedbackLoop started')
     loopCounter = 0
-    helper.updateColors(midiNote2exec) 
+    if not CheckConfig() then
+      enabled = false
+    else
+      helper.updateColors(midiNote2exec) 
+    end
     oldButtonPage = gma.show.getvar('BUTTONPAGE')
     oldFaderPage = gma.show.getvar('FADERPAGE')
     while enabled do 
-      if updateOnPageChange and currentButtonPage ~= gma.show.getvar('BUTTONPAGE') and oldFaderPage ~=gma.show.getvar('FADERPAGE') then
+      if updateOnPageChange and (oldButtonPage ~= gma.show.getvar('BUTTONPAGE') or oldFaderPage ~=gma.show.getvar('FADERPAGE')) then
         --gma.echo("updating colors thru page change")
         helper.updateColors(midiNote2exec) 
+        cache={}
         oldButtonPage = gma.show.getvar('BUTTONPAGE')
         oldFaderPage = gma.show.getvar('FADERPAGE')
       end
@@ -508,6 +554,7 @@ do local _ENV = midifeedback
           loopCounter = 0
           --gma.echo("updating colors thru loop")
           helper.updateColors(midiNote2exec)    
+          cache={}
         else
           loopCounter = loopCounter +1
         end
