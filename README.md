@@ -9,5 +9,7 @@ Lua script for grandMA2 Lighting Consoles to provide LED Feedback on Midi-Contro
 # Changelog
 ## v 1.1
 -ADDED: validation for user-configuration with (hopefully) helpfull error messages
+
 -FIXED: updates for LED-Feedback will now be send everytime the color-cache is updated in addition to a state change of the exec
+
 -FIXED: Bug that did not trigger a color-update on page change when only the buttonpage OR the Fadepage is changed
