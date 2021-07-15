@@ -65,7 +65,7 @@ userColor = 'red'
 -- default is 20 which results in an color update about once every 1.2 seconds
 -- value of 50 results in an update about every 4.5 seconds
 -- value of 200 results in an update about every 12 seconds
-updateInterval = 200
+updateInterval = 50
 
 
 -- set this to true to prevent the continious update of colors
@@ -89,7 +89,7 @@ updateOnPageChange = true
 ---------------------------------------------------------------
 ------------- MidiFeedbackLoop by GLAD - 2016 -----------------
 ---- Modified for Midicraft Controllers by Niklas Aumüller ----
------------------------ Version 1.1 ---------------------------
+----------------------- Version 1.2 ---------------------------
 -------- sends Midi note-velocity combinations based ----------
 ----------- on Lua accessible executor information: -----------
 ---- empty / non-empty / sequence (off) / sequence (on) -------
@@ -260,19 +260,21 @@ helper.lookupColor = function(exec)
   local execToken, cueToken = 'Executor %s', 'Executor %s Cue'
   local handle = gma.show.getobj.handle(cueToken:format(exec)) or gma.show.getobj.handle(execToken:format(exec))
   local c = gma.show.getobj.class(handle or 1)
+  if helper.class2txt(c) == 'CMD_CUE' then
+    handle = gma.show.getobj.parent(handle) --needed to get the handle of the sequence and not of the cue
+  end
   if helper.class2txt(c) == 'CMD_SEQUENCE' or helper.class2txt(c) == 'CMD_CUE' then
     seq = gma.show.getobj.number(handle)
     gma.cmd('Export Sequence '..seq..' "LUAtmp'..seq..'" /nc')
   else
     return nil
   end
-  --gma.echo('seq '..seq)
   path = gma.show.getvar('PATH')..'/importexport/LUAtmp'..seq..'.xml'
   local t = {}  
   for line in io.lines(path) do
     t[#t + 1] = line
   end
-  os.remove(path) --delete the temp file
+  --os.remove(path) --delete the temp file
   local color = helper.extractColorFromXML(t)
 
   if color == nil then
