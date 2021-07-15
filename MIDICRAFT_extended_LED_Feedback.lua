@@ -65,7 +65,7 @@ userColor = 'red'
 -- default is 20 which results in an color update about once every 1.2 seconds
 -- value of 50 results in an update about every 4.5 seconds
 -- value of 200 results in an update about every 12 seconds
-updateInterval = 50
+updateInterval = 200
 
 
 -- set this to true to prevent the continious update of colors
