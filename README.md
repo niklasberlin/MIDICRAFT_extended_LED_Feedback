@@ -1,6 +1,9 @@
 # MIDICRAFT extended LED Feedback v1.2
 Lua script for grandMA2 Lighting Consoles to provide LED Feedback on Midi-Controllers from Midicraft
 
+# Demoshow
+The Demoshow is created with GrandMA2 onPC Version 3.9.60.18 and shows the use of the script with a Midicraft .PUSH
+
 # ToDo:
 -add possibility to get colors for macros and effects and not only sequences
 
