@@ -311,7 +311,7 @@ helper.lookupColor = function(exec)
   elseif red < 0.3 and green <= 0.7 and blue == 1 then
     return 'lavender'
   elseif red <= 0.7 and green < 0.3 and blue == 1 then
-    return 'violett'
+    return 'violet'
   elseif red == 1 and green < 0.3 and blue <= 0.7 then
     return 'pink'
   -- whites
