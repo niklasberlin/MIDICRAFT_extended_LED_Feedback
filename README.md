@@ -12,6 +12,7 @@ The Demoshow is created with GrandMA2 onPC Version 3.9.60.18 and shows the use o
 # Changelog
 ## v1.2.1
 -FIXED: lokup of color "seagreen" now works as intended (issue #4)
+
 -FIXED: spelling error of color violett (issue #3)
 
 ## v1.2
