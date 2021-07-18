@@ -89,7 +89,7 @@ updateOnPageChange = true
 ---------------------------------------------------------------
 ------------- MidiFeedbackLoop by GLAD - 2016 -----------------
 ---- Modified for Midicraft Controllers by Niklas Aumüller ----
------------------------ Version 1.2 ---------------------------
+---------------------- Version 1.2.1 --------------------------
 -------- sends Midi note-velocity combinations based ----------
 ----------- on Lua accessible executor information: -----------
 ---- empty / non-empty / sequence (off) / sequence (on) -------
@@ -306,7 +306,7 @@ helper.lookupColor = function(exec)
     return 'orange'
   elseif red <= 0.7 and green == 1 and blue < 0.3 then
     return 'ferngreen'
-  elseif red <= 0.7 and green == 1 and blue < 0.3 then
+  elseif red <= 0.3 and green == 1 and blue <= 0.7 then
     return 'seagreen'
   elseif red < 0.3 and green <= 0.7 and blue == 1 then
     return 'lavender'
