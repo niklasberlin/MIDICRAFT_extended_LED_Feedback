@@ -50,10 +50,10 @@
 -- 'user color flashing bright' -- deprecated with controller Firmware-Version 2.x (replaced with static complementary color)
 -- 'user color flashing dark'
 
-ledModeSeqOn = 'static complementary'
-ledModeSeqOff = 'static complementary controller'
-ledModeEmpty = 'user color complementary'
-ledModeNotEmpty = 'user color flashing bright'
+ledModeSeqOn = 'static bright'
+ledModeSeqOff = 'static dark'
+ledModeEmpty = 'off'
+ledModeNotEmpty = 'user color dark'
 
 -- possible colors: 'white', 'red', 'orange', 'yellow', 
 -- 'ferngreen', 'green', 'seagreen', 'cyan', 'lavender',
