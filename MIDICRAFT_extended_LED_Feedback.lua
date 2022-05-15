@@ -14,7 +14,8 @@
 --
 -- 'static dark'
 -- 'static bright'
--- 'flashing bright'
+-- 'static complementary' -- complementary colors are defined in the Midicraft controller and supported from Firmware-Version 2.x 
+-- 'flashing bright'  -- deprecated with controller Firmware-Version 2.x (replaced with static complementary color)
 -- 'flashing dark'
 --
 -- the following values will use the color defined inside the 
@@ -22,7 +23,8 @@
 --
 -- 'static dark controller'
 -- 'static bright controller'
--- 'flashing bright controller'
+-- 'static complementary controller' -- complementary colors are defined in the Midicraft controller and supported from Firmware-Version 2.x 
+-- 'flashing bright controller' -- deprecated with controller Firmware-Version 2.x (replaced with static complementary color)
 -- 'flashing dark controller'
 --
 -- the following values will use the Feedback-Mode 
@@ -44,17 +46,19 @@
 --
 -- 'user color dark'
 -- 'user color bright'
--- 'user color flashing bright'
+-- 'user color complementary' -- complementary colors are defined in the Midicraft controller and supported from Firmware-Version 2.x 
+-- 'user color flashing bright' -- deprecated with controller Firmware-Version 2.x (replaced with static complementary color)
 -- 'user color flashing dark'
 
-ledModeSeqOn = 'static bright'
-ledModeSeqOff = 'static dark'
-ledModeEmpty = 'off'
-ledModeNotEmpty = 'user color dark'
+ledModeSeqOn = 'static complementary'
+ledModeSeqOff = 'static complementary controller'
+ledModeEmpty = 'user color complementary'
+ledModeNotEmpty = 'user color flashing bright'
 
 -- possible colors: 'white', 'red', 'orange', 'yellow', 
 -- 'ferngreen', 'green', 'seagreen', 'cyan', 'lavender',
 -- 'blue', 'violet', 'magenta', 'pink', 'CTO', 'CTB' 
+
 userColor = 'red'
 
 -- this value sets how often the scripts checks for an color update, 
@@ -65,15 +69,18 @@ userColor = 'red'
 -- default is 20 which results in an color update about once every 1.2 seconds
 -- value of 50 results in an update about every 4.5 seconds
 -- value of 200 results in an update about every 12 seconds
-updateInterval = 200
+
+updateInterval = 100
 
 
 -- set this to true to prevent the continious update of colors
+
 updateOnlyOnStart = false
 
 
 -- if set to true, the script will monitor the current page and reload the colors
 -- on a page change
+
 updateOnPageChange = true
 
 
@@ -89,7 +96,7 @@ updateOnPageChange = true
 ---------------------------------------------------------------
 ------------- MidiFeedbackLoop by GLAD - 2016 -----------------
 ---- Modified for Midicraft Controllers by Niklas Aumüller ----
----------------------- Version 1.2.1 --------------------------
+---------------------- Version 1.3 --------------------------
 -------- sends Midi note-velocity combinations based ----------
 ----------- on Lua accessible executor information: -----------
 ---- empty / non-empty / sequence (off) / sequence (on) -------
@@ -127,13 +134,24 @@ end
 
 local function CheckConfig()
   --this function will check the user configuration for errors
-  local modes = {'off', 'static dark', 'static bright', 'flashing bright', 'flashing dark', 'static dark controller', 'static bright controller', 'flashing bright controller', 'flashing dark controller', 'feedback', 'feedback controller', 'user color dark', 'user color bright', 'user color flashing bright', 'user color flashing dark'}
+  local modes = {'off', 'static dark', 'static bright', 'flashing bright', 'static complementary', 'flashing dark', 'static dark controller', 'static bright controller', 'static complementary controller', 'flashing bright controller', 'flashing dark controller', 'feedback', 'feedback controller', 'user color dark', 'user color bright', 'user color complementary', 'user color flashing bright', 'user color flashing dark'}
+  local deprecated_modes = {'flashing bright', 'flashing bright controller', 'user color flashing bright'}
   local varNames = {['ledModeSeqOn'] = ledModeSeqOn, ['ledModeSeqOff'] = ledModeSeqOff, ['ledModeEmpty'] = ledModeEmpty, ['ledModeNotEmpty'] = ledModeNotEmpty}
+
+  -- WARNING ERRORS --
+  for k, v in pairs(varNames) do
+    if inTable(v, deprecated_modes) then
+      gma.echo('Variable '..k..' is set to mode "'..v..'", this mode is deprecated and might cause unexpected behaviour. For more details visit the GitHub-Page for this Plugin')
+      gma.feedback('Variable '..k..' is set to mode "'..v..'", this mode is deprecated and might cause unexpected behaviour. For more details visit the GitHub-Page for this Plugin')
+    end
+  end
+
+  -- BREAKING ERRORS --
   -- check all mode variables
-  for k, v in ipairs(varNames) do
+  for k, v in pairs(varNames) do
     if not inTable(v, modes) then
-      gma.echo('Variable '..k..' has a not accepted value')
-      gma.feedback('Variable '..k..' has a not accepted value')
+      gma.echo('Variable '..k..' has a not accepted value ('..v..')')
+      gma.feedback('Variable '..k..' has a not accepted value ('..v..')')
       return false
     end
   end
@@ -190,21 +208,24 @@ helper.get.colorOffset = function(color)
 end
 
 helper.get.modeOffset = function(mode)
+  -- naming schema: contains word "controller" -> color is defined by controller and not by MA2 | word "user color" -> color defined in user var at the top of the script
   local mode2offset = {}
   mode2offset['off'] = 0
   mode2offset['static dark'] = 1
   mode2offset['static bright'] = 17
   mode2offset['flashing bright'] = 33
+  mode2offset['static complementary'] = 33
   mode2offset['flashing dark'] = 49
   mode2offset['static dark controller'] = 126
   mode2offset['static bright controller'] = 127
   mode2offset['flashing bright controller'] = 124
-  mode2offset['flashing dark controller'] = 125
+  mode2offset['static complementary controller'] = 124
   mode2offset['flashing dark controller'] = 125
   mode2offset['feedback'] = 65
   mode2offset['feedback controller'] = 123
   mode2offset['user color dark'] = 1
   mode2offset['user color bright'] = 17
+  mode2offset['user color complementary'] = 33
   mode2offset['user color flashing bright'] = 33
   mode2offset['user color flashing dark'] = 49
   return mode2offset[mode]
@@ -468,6 +489,7 @@ do local _ENV = midifeedback
         mode = mode.." controller" -- add the word controller so that we always have a mode where we use the controller defined color
         return helper.get.modeOffset(mode)
       end
+      
     elseif class2txt[c] == 'CMD_SEQUENCE' then --sequence is off
       if ledModeSeqOff == 'off' then
         return helper.get.modeOffset(ledModeSeqOff)

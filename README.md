@@ -10,6 +10,11 @@ The Demoshow is created with GrandMA2 onPC Version 3.9.60.18 and shows the use o
 -add more user colors to be more flexible
 
 # Changelog
+## v1.3 - 2022-05-15
+-ADDED: Mode for complementary colors (requires Midicraft Firmware 2.x)
+
+-DEPRECATED: all Modes that used to flash between bright and dark colors (these modes no longer exists in Midicraft Firmware 2.x), if you are using your controllers with an 1.6+ Version you can still use the old modes, but you will get a warning during the config check of the script
+
 ## v1.2.1
 -FIXED: lokup of color "seagreen" now works as intended (issue #4)
 
